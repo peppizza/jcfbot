@@ -1,6 +1,5 @@
 mod commands;
 use commands::{tempus::link::link, voteboil::voteboil};
-use sqlx::{Connection, SqliteConnection};
 
 use std::{env, sync::Arc, time::Duration};
 
