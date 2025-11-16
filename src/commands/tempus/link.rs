@@ -1,6 +1,8 @@
 use std::{env, time::Duration};
 
-use ::serenity::all::{ComponentInteractionCollector, CreateButton, CreateInteractionResponse};
+use ::serenity::all::{
+    ComponentInteractionCollector, CreateButton, CreateInteractionResponse, Mentionable, UserId,
+};
 use poise::{CreateReply, command, serenity_prelude as serenity};
 use reqwest::StatusCode;
 use serde_derive::{Deserialize, Serialize};
@@ -58,10 +60,23 @@ pub async fn link(
     ))
     .await?;
 
-    if response.status() == StatusCode::TOO_MANY_REQUESTS {
-        ctx.framework().shard_manager().shutdown_all().await;
-        return Ok(());
-    }
+    match response.status() {
+        StatusCode::TOO_MANY_REQUESTS => {
+            ctx.send(CreateReply::default().content(format!(
+                "{} ratelimited!!!! {}",
+                ctx.author_member().await.unwrap().mention(),
+                UserId::new(253290704384557057).mention()
+            )))
+            .await?;
+            ctx.framework().shard_manager().shutdown_all().await;
+            return Ok(());
+        }
+        StatusCode::NOT_FOUND => {
+            ctx.reply("Not a valid tempus id!").await?;
+            return Ok(());
+        }
+        _ => {}
+    };
 
     let player_stats: TempusPlayerStats = serde_json::from_str(&response.text().await?)?;
 

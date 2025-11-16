@@ -1,6 +1,6 @@
 use std::{env, fmt::Display, time::Duration};
 
-use ::serenity::all::{CreateButton, CreateEmbed, CreateInteractionResponse};
+use ::serenity::all::{CreateButton, CreateEmbed, CreateInteractionResponse, Mentionable};
 use hhmmss::Hhmmss;
 use poise::{CreateReply, command, serenity_prelude as serenity};
 use reqwest::StatusCode;
@@ -204,6 +204,12 @@ async fn time(
     .await?;
 
     if search.status() == StatusCode::TOO_MANY_REQUESTS {
+        ctx.send(poise::CreateReply::default().content(format!(
+            "{} ratelimited!!!! {}",
+            ctx.author_member().await.unwrap().mention(),
+            serenity::UserId::new(253290704384557057).mention()
+        )))
+        .await?;
         ctx.framework().shard_manager().shutdown_all().await;
         return Ok(());
     }
@@ -284,6 +290,12 @@ async fn time(
     let res = reqwest::get(format!("https://tempus2.xyz/api/v0/maps/name/{map_name}/zones/typeindex/{}/{zone_index}/records/player/{tempus_id}/{}", zone_type, class as usize)).await?;
 
     if res.status() == StatusCode::TOO_MANY_REQUESTS {
+        ctx.send(poise::CreateReply::default().content(format!(
+            "{} ratelimited!!!! {}",
+            ctx.author_member().await.unwrap().mention(),
+            serenity::UserId::new(253290704384557057).mention()
+        )))
+        .await?;
         ctx.framework().shard_manager().shutdown_all().await;
         return Ok(());
     }
