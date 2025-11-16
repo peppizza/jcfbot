@@ -109,7 +109,18 @@ pub async fn voteboil(
             .await?;
     }
 
-    vote_msg.delete(ctx).await?;
+    let (embed, _) = voteboil_embed_and_component(
+        ctx,
+        target_name,
+        &target_pfp,
+        yes_votes.clone(),
+        no_votes.clone(),
+        uuid,
+    )
+    .await;
+    vote_msg
+        .edit(ctx, CreateReply::default().embed(embed).components(vec![]))
+        .await?;
 
     if yes_votes.read().await.len() >= no_votes.read().await.len() {
         let img = boil_image(&target_pfp).await?;
