@@ -75,7 +75,14 @@ pub async fn rank(ctx: Context<'_>, index: Option<i64>) -> Result<(), anyhow::Er
             return Ok(());
         }
 
-        let players: TempusRankData = serde_json::from_str(&res.text().await?)?;
+        let players = match serde_json::from_str::<TempusRankData>(&res.text().await?) {
+            Ok(p) => p,
+            Err(_) => {
+                ctx.reply("Tempus API error :(").await?;
+                return Ok(());
+            }
+        };
+
         let count = players.count;
         let player = players.players[0].clone();
 
