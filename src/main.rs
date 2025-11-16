@@ -1,4 +1,5 @@
 mod commands;
+use commands::voteboil::voteboil;
 
 use std::{env, sync::Arc, time::Duration};
 
@@ -34,7 +35,7 @@ async fn main() {
     dotenv::dotenv().unwrap();
 
     let options = poise::FrameworkOptions {
-        commands: vec![commands::voteboil()],
+        commands: vec![voteboil()],
         prefix_options: poise::PrefixFrameworkOptions {
             prefix: Some("!".into()),
             edit_tracker: Some(Arc::new(poise::EditTracker::for_timespan(
