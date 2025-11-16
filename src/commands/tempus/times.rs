@@ -147,7 +147,8 @@ struct TempusMapSearch {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-enum Classes {
+pub enum Classes {
+    Overall,
     Soldier = 3,
     Demoman = 4,
 }
