@@ -7,7 +7,10 @@ use anyhow::Error;
 use poise::serenity_prelude as serenity;
 use tracing::{error, info};
 
-use crate::commands::tempus::times::{dtime, stime};
+use crate::commands::tempus::{
+    shutdown,
+    times::{dbtime, dctime, dtime, dttime, sbtime, sctime, stime, sttime},
+};
 
 type Context<'a> = poise::Context<'a, Data, Error>;
 
@@ -37,7 +40,19 @@ async fn main() {
     dotenv::dotenv().unwrap();
 
     let options = poise::FrameworkOptions {
-        commands: vec![voteboil(), link(), stime(), dtime()],
+        commands: vec![
+            voteboil(),
+            link(),
+            stime(),
+            dtime(),
+            sbtime(),
+            dbtime(),
+            sctime(),
+            dctime(),
+            sttime(),
+            dttime(),
+            shutdown(),
+        ],
         prefix_options: poise::PrefixFrameworkOptions {
             prefix: Some("!".into()),
             edit_tracker: Some(Arc::new(poise::EditTracker::for_timespan(

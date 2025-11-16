@@ -2,6 +2,7 @@ use std::{env, time::Duration};
 
 use ::serenity::all::{ComponentInteractionCollector, CreateButton, CreateInteractionResponse};
 use poise::{CreateReply, command, serenity_prelude as serenity};
+use reqwest::StatusCode;
 use serde_derive::{Deserialize, Serialize};
 use serenity::all::CreateEmbed;
 use sqlx::{Connection, SqliteConnection};
@@ -55,11 +56,14 @@ pub async fn link(
         "https://tempus2.xyz/api/v0/players/id/{}/stats",
         tempus_id
     ))
-    .await?
-    .text()
     .await?;
 
-    let player_stats: TempusPlayerStats = serde_json::from_str(&response)?;
+    if response.status() == StatusCode::TOO_MANY_REQUESTS {
+        ctx.framework().shard_manager().shutdown_all().await;
+        return Ok(());
+    }
+
+    let player_stats: TempusPlayerStats = serde_json::from_str(&response.text().await?)?;
 
     let reply = {
         let embed = CreateEmbed::new()
