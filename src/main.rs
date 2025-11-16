@@ -1,5 +1,8 @@
 mod commands;
+mod consts;
+
 use commands::{tempus::link::link, voteboil::voteboil};
+use rand::seq::IndexedRandom;
 
 use std::{env, sync::Arc, time::Duration};
 
@@ -7,10 +10,13 @@ use anyhow::Error;
 use poise::serenity_prelude as serenity;
 use tracing::{error, info};
 
-use crate::commands::tempus::{
-    ranks::rank,
-    shutdown,
-    times::{dbtime, dctime, dtime, dttime, sbtime, sctime, stime, sttime},
+use crate::{
+    commands::tempus::{
+        ranks::rank,
+        shutdown,
+        times::{dbtime, dctime, dtime, dttime, sbtime, sctime, stime, sttime},
+    },
+    consts::MAGIC_EIGHT_BALL,
 };
 
 type Context<'a> = poise::Context<'a, Data, Error>;
@@ -64,12 +70,33 @@ async fn main() {
         },
         on_error: |error| Box::pin(on_error(error)),
 
-        event_handler: |_ctx, event, _framework, _data| {
+        event_handler: |ctx, event, _framework, _data| {
             Box::pin(async move {
                 info!(
                     "Got an event in event handler: {:?}",
                     event.snake_case_name()
                 );
+
+                match event {
+                    serenity::FullEvent::Ready { data_about_bot, .. } => {
+                        info!("Logged in as: {}", data_about_bot.user.name);
+                    }
+                    serenity::FullEvent::Message { new_message } => {
+                        if new_message.mentions_me(ctx).await?
+                            && new_message.content.contains("is this true")
+                            && new_message.author.id != ctx.cache.current_user().id
+                        {
+                            let answer = {
+                                let mut rng = rand::rng();
+                                MAGIC_EIGHT_BALL.choose(&mut rng).unwrap()
+                            };
+
+                            new_message.reply_ping(ctx, answer.to_string()).await?;
+                        }
+                    }
+                    _ => {}
+                };
+
                 Ok(())
             })
         },
