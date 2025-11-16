@@ -18,9 +18,10 @@ pub struct TempusPlayerInfo {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct TempusRankInfo {
-    points: f64,
-    rank: i64,
+pub struct TempusRankInfo {
+    pub points: f64,
+    pub rank: i64,
+    pub total_ranked: i64,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

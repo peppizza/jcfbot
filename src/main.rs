@@ -8,6 +8,7 @@ use poise::serenity_prelude as serenity;
 use tracing::{error, info};
 
 use crate::commands::tempus::{
+    ranks::rank,
     shutdown,
     times::{dbtime, dctime, dtime, dttime, sbtime, sctime, stime, sttime},
 };
@@ -52,6 +53,7 @@ async fn main() {
             sttime(),
             dttime(),
             shutdown(),
+            rank(),
         ],
         prefix_options: poise::PrefixFrameworkOptions {
             prefix: Some("!".into()),

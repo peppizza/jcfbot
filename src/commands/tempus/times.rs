@@ -1,13 +1,15 @@
-use std::{env, fmt::Display, time::Duration};
+use std::{fmt::Display, time::Duration};
 
 use ::serenity::all::{CreateButton, CreateEmbed, CreateInteractionResponse, Mentionable};
 use hhmmss::Hhmmss;
 use poise::{CreateReply, command, serenity_prelude as serenity};
 use reqwest::StatusCode;
 use serde_derive::{Deserialize, Serialize};
-use sqlx::{Connection, SqliteConnection};
 
-use crate::{Context, commands::tempus::link::TempusPlayerInfo};
+use crate::{
+    Context,
+    commands::tempus::{get_tempus_id, link::TempusPlayerInfo},
+};
 
 #[command(prefix_command, global_cooldown = 2, user_cooldown = 5)]
 pub async fn stime(ctx: Context<'_>, map: String) -> Result<(), anyhow::Error> {
@@ -180,22 +182,12 @@ async fn time(
     let uuid = ctx.id();
     let discord_id = ctx.author().id.get() as i64;
 
-    let tempus_id = {
-        let mut conn = SqliteConnection::connect(&env::var("DATABASE_URL").unwrap()).await?;
-
-        let res = sqlx::query!(
-            "SELECT tempus_id FROM ids WHERE discord_id = ?1",
-            discord_id
-        )
-        .fetch_optional(&mut conn)
-        .await?;
-
-        if res.is_none() {
-            ctx.reply("Tempus ID not linked!").await?;
+    let tempus_id = match get_tempus_id(discord_id).await {
+        Ok(id) => id,
+        Err(e) => {
+            ctx.reply(format!("{}", e)).await?;
             return Ok(());
         }
-
-        res.unwrap().tempus_id
     };
 
     let search = reqwest::get(format!(
