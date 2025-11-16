@@ -25,11 +25,18 @@ struct TempusResultData {
 }
 
 #[derive(Deserialize, Serialize, Debug)]
+struct TempusCompletionInfo {
+    soldier: i64,
+    demoman: i64,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
 struct TempusCompletionData {
+    completion_info: TempusCompletionInfo,
     result: Option<TempusResultData>,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 enum Classes {
     Soldier = 3,
     Demoman = 4,
@@ -65,13 +72,20 @@ async fn time(ctx: Context<'_>, map: String, class: Classes) -> Result<(), anyho
     let res = reqwest::get(format!("https://tempus2.xyz/api/v0/maps/name/{map}/zones/typeindex/map/1/records/player/{tempus_id}/{}", class as usize)).await?.text().await?;
 
     let completion_data: TempusCompletionData = serde_json::from_str(&res)?;
+    let completions = if class == Classes::Soldier {
+        completion_data.completion_info.soldier
+    } else {
+        completion_data.completion_info.demoman
+    };
+
     if let Some(completion_data) = completion_data.result {
         let time = Duration::from_secs_f64(completion_data.duration);
 
         ctx.reply(format!(
-            "{} is ranked {} on {}, {}",
+            "{} is ranked {}/{} on {}, {}",
             completion_data.player_info.name,
             completion_data.rank,
+            completions,
             map,
             time.hhmmssxxx()
         ))
