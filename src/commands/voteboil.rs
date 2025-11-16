@@ -50,7 +50,8 @@ pub async fn voteboil(
     .await;
 
     info!("yes: {:?}, no: {:?}", yes_votes, no_votes);
-    ctx.send(CreateReply::default().embed(embed).components(components))
+    let vote_msg = ctx
+        .send(CreateReply::default().embed(embed).components(components))
         .await?;
 
     while let Some(vote) = serenity::ComponentInteractionCollector::new(ctx)
@@ -108,7 +109,7 @@ pub async fn voteboil(
             .await?;
     }
 
-    info!("timer done");
+    vote_msg.delete(ctx).await?;
 
     if yes_votes.read().await.len() >= no_votes.read().await.len() {
         let img = boil_image(&target_pfp).await?;
@@ -120,8 +121,10 @@ pub async fn voteboil(
         )
         .await?;
     } else {
-        ctx.reply(format!("{} has been spared....", target.mention()))
-            .await?;
+        ctx.send(
+            CreateReply::default().content(format!("{} has been spared...", target.mention())),
+        )
+        .await?;
     }
 
     Ok(())
@@ -199,10 +202,10 @@ async fn voteboil_embed_and_component(
     let components = vec![serenity::CreateActionRow::Buttons(vec![
         serenity::CreateButton::new(format!("{uuid}.yes"))
             .label("YES!!!")
-            .style(serenity::ButtonStyle::Primary),
+            .style(serenity::ButtonStyle::Success),
         serenity::CreateButton::new(format!("{uuid}.no"))
             .label("no")
-            .style(serenity::ButtonStyle::Primary),
+            .style(serenity::ButtonStyle::Danger),
     ])];
 
     (embed, components)

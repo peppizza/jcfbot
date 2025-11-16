@@ -1,5 +1,6 @@
 mod commands;
-use commands::voteboil::voteboil;
+use commands::{tempus::link::link, voteboil::voteboil};
+use sqlx::{Connection, SqliteConnection};
 
 use std::{env, sync::Arc, time::Duration};
 
@@ -35,7 +36,7 @@ async fn main() {
     dotenv::dotenv().unwrap();
 
     let options = poise::FrameworkOptions {
-        commands: vec![voteboil()],
+        commands: vec![voteboil(), link()],
         prefix_options: poise::PrefixFrameworkOptions {
             prefix: Some("!".into()),
             edit_tracker: Some(Arc::new(poise::EditTracker::for_timespan(
