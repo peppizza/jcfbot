@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 anyhow = "1.0"
 dotenv = "0.15"
+hhmmss = "0.1"
 magick_rust = "2.0"
 poise = "0.6"
 rand = "0.9"

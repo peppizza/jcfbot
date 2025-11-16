@@ -9,9 +9,9 @@ use sqlx::{Connection, SqliteConnection};
 use crate::Context;
 
 #[derive(Serialize, Deserialize, Debug)]
-struct TempusPlayerInfo {
-    name: String,
-    id: i64,
+pub struct TempusPlayerInfo {
+    pub name: String,
+    pub id: i64,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -41,10 +41,10 @@ pub async fn link(
             r#"SELECT tempus_id FROM ids WHERE discord_id = ?1"#,
             discord_id
         )
-        .fetch_one(&mut conn)
-        .await;
+        .fetch_optional(&mut conn)
+        .await?;
 
-        if let Ok(row) = res {
+        if let Some(row) = res {
             ctx.reply(format!("Tempus ID ({}) already linked!", row.tempus_id))
                 .await?;
             return Ok(());
