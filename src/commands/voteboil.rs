@@ -144,7 +144,7 @@ pub async fn voteboil(
 async fn boil_image(target_pfp: &str) -> Result<Vec<u8>, anyhow::Error> {
     let stewchoice = {
         let mut rng = rand::rng();
-        rng.random_range(1..8)
+        rng.random_range(1..=8)
     };
 
     let stewwand = MagickWand::new();
