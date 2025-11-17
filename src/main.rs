@@ -83,7 +83,7 @@ async fn main() {
                     }
                     serenity::FullEvent::Message { new_message } => {
                         if new_message.mentions_me(ctx).await?
-                            && new_message.content.contains("is this true")
+                            && new_message.content.to_lowercase().contains("is this true")
                             && new_message.author.id != ctx.cache.current_user().id
                         {
                             let answer = {
