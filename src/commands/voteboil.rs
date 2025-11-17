@@ -156,7 +156,10 @@ async fn boil_image(target_pfp: &str) -> Result<Vec<u8>, anyhow::Error> {
     stewwand.read_image_blob(stewimg)?;
     pfpwand.read_image_blob(pfpimg)?;
 
+    let stew_size_x = stewwand.get_image_width();
+
     pfpwand.adaptive_resize_image(556, 556)?;
+    pfpwand.adaptive_resize_image(stew_size_x / 2, stew_size_x / 2)?;
 
     stewwand.compose_images_gravity(
         &pfpwand,
