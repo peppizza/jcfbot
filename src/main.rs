@@ -2,7 +2,7 @@ mod commands;
 mod consts;
 
 use commands::{tempus::link::link, voteboil::voteboil};
-use rand::seq::IndexedRandom;
+use rand::{Rng, seq::IndexedRandom};
 
 use std::{env, sync::Arc, time::Duration};
 
@@ -16,7 +16,7 @@ use crate::{
         shutdown,
         times::{dbtime, dctime, dtime, dttime, sbtime, sctime, stime, sttime},
     },
-    consts::MAGIC_EIGHT_BALL,
+    consts::{FUNNY_MESSAGE, MAGIC_EIGHT_BALL},
 };
 
 type Context<'a> = poise::Context<'a, Data, Error>;
@@ -88,7 +88,11 @@ async fn main() {
                         {
                             let answer = {
                                 let mut rng = rand::rng();
-                                MAGIC_EIGHT_BALL.choose(&mut rng).unwrap()
+                                if rng.random_ratio(1, 50) {
+                                    FUNNY_MESSAGE
+                                } else {
+                                    MAGIC_EIGHT_BALL.choose(&mut rng).unwrap()
+                                }
                             };
 
                             new_message.reply_ping(ctx, answer.to_string()).await?;
