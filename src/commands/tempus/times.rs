@@ -8,7 +8,7 @@ use serde_derive::{Deserialize, Serialize};
 
 use crate::{
     Context,
-    commands::tempus::{get_tempus_id, link::TempusPlayerInfo},
+    commands::tempus::{calculate_placement, get_tempus_id, link::TempusPlayerInfo},
 };
 
 #[command(prefix_command, global_cooldown = 2, user_cooldown = 5)]
@@ -305,24 +305,26 @@ async fn time(
 
         if zone_type == ZoneType::Map {
             ctx.reply(format!(
-                "{} is ranked {}/{} on {}, {}",
+                "{} is ranked {}/{} on {}, {}, ({})",
                 completion_data.player_info.name,
                 completion_data.rank,
                 completions,
                 map_name,
-                time.hhmmssxxx()
+                time.hhmmssxxx(),
+                calculate_placement(completion_data.rank, completions as f32)
             ))
             .await?;
         } else {
             ctx.reply(format!(
-                "{} is ranked {}/{} on {} {} {}, {}",
+                "{} is ranked {}/{} on {} {} {}, {} ({})",
                 completion_data.player_info.name,
                 completion_data.rank,
                 completions,
                 map_name,
                 zone_type,
                 zone_index,
-                time.hhmmssxxx()
+                time.hhmmssxxx(),
+                calculate_placement(completion_data.rank, completions as f32)
             ))
             .await?;
         }
