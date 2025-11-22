@@ -7,7 +7,9 @@ use anyhow::{Error, anyhow};
 use magick_rust::{MagickWand, magick_wand_genesis};
 use poise::{CreateReply, serenity_prelude as serenity};
 use rand::Rng;
+use sqlx::{Connection, SqliteConnection};
 use std::{
+    env,
     sync::{Arc, Once},
     time::Duration,
 };
@@ -131,6 +133,16 @@ pub async fn voteboil(
                 .content(format!("{} HAS BEEN BOILED", target.mention())),
         )
         .await?;
+
+        let target_id = target.user.id.get() as i64;
+
+        let mut conn = SqliteConnection::connect(&env::var("DATABASE_URL").unwrap()).await?;
+        sqlx::query!(
+            "INSERT INTO boilboard (discord_id, boil_count) VALUES (?, 1) ON CONFLICT (discord_id) DO UPDATE SET boil_count=boil_count+1",
+            target_id
+        )
+        .execute(&mut conn)
+        .await?;
     } else {
         ctx.send(
             CreateReply::default().content(format!("{} has been spared...", target.mention())),
@@ -223,4 +235,40 @@ async fn voteboil_embed_and_component(
     ])];
 
     (embed, components)
+}
+
+#[poise::command(prefix_command)]
+pub async fn boilboard(ctx: Context<'_>) -> Result<(), anyhow::Error> {
+    let top_ten = {
+        let mut conn = SqliteConnection::connect(&env::var("DATABASE_URL").unwrap()).await?;
+
+        sqlx::query!(
+            "SELECT discord_id, boil_count FROM boilboard ORDER BY boil_count DESC LIMIT 10"
+        )
+        .fetch_all(&mut conn)
+        .await?
+    };
+
+    ctx.send(
+        CreateReply::default().reply(true).embed(
+            serenity::CreateEmbed::default()
+                .title("boilboard")
+                .description(
+                    top_ten
+                        .iter()
+                        .map(|e| {
+                            format!(
+                                "{}: {}",
+                                serenity::UserId::new(e.discord_id as u64).mention(),
+                                e.boil_count
+                            )
+                        })
+                        .collect::<Vec<String>>()
+                        .join("\n"),
+                ),
+        ),
+    )
+    .await?;
+
+    Ok(())
 }

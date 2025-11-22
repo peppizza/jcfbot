@@ -11,10 +11,13 @@ use poise::serenity_prelude as serenity;
 use tracing::{error, info};
 
 use crate::{
-    commands::tempus::{
-        ranks::rank,
-        shutdown,
-        times::{dbtime, dctime, dtime, dttime, sbtime, sctime, stime, sttime},
+    commands::{
+        tempus::{
+            ranks::rank,
+            shutdown,
+            times::{dbtime, dctime, dtime, dttime, sbtime, sctime, stime, sttime},
+        },
+        voteboil::boilboard,
     },
     consts::{FUNNY_MESSAGE, MAGIC_EIGHT_BALL},
 };
@@ -60,6 +63,7 @@ async fn main() {
             dttime(),
             shutdown(),
             rank(),
+            boilboard(),
         ],
         prefix_options: poise::PrefixFrameworkOptions {
             prefix: Some("!".into()),
